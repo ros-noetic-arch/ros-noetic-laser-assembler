@@ -1,0 +1,70 @@
+diff --git a/include/laser_assembler/base_assembler.h b/include/laser_assembler/base_assembler.h
+index 2481dd7..11c6271 100644
+--- a/include/laser_assembler/base_assembler.h
++++ b/include/laser_assembler/base_assembler.h
+@@ -199,7 +199,7 @@ void BaseAssembler<T>::start(const std::string& in_topic_name)
+   {
+     scan_sub_.subscribe(n_, in_topic_name, 10);
+     tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, 10);
+-    tf_filter_->registerCallback( boost::bind(&BaseAssembler<T>::msgCallback, this, _1) );
++    tf_filter_->registerCallback( boost::bind(&BaseAssembler<T>::msgCallback, this, boost::placeholders::_1) );
+   }
+ }
+ 
+@@ -213,7 +213,7 @@ void BaseAssembler<T>::start()
+   {
+     scan_sub_.subscribe(n_, "bogus", 10);
+     tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, 10);
+-    tf_filter_->registerCallback( boost::bind(&BaseAssembler<T>::msgCallback, this, _1) );
++    tf_filter_->registerCallback( boost::bind(&BaseAssembler<T>::msgCallback, this, boost::placeholders::_1) );
+   }
+ }
+ 
+diff --git a/include/laser_assembler/base_assembler_srv.h b/include/laser_assembler/base_assembler_srv.h
+index 36dbb64..8c69745 100644
+--- a/include/laser_assembler/base_assembler_srv.h
++++ b/include/laser_assembler/base_assembler_srv.h
+@@ -211,7 +211,7 @@ void BaseAssemblerSrv<T>::start()
+     scan_sub_.subscribe(n_, "scan_in", 10);
+     tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, 10);
+     tf_filter_->setTolerance(ros::Duration(tf_tolerance_secs_));
+-    tf_filter_->registerCallback( boost::bind(&BaseAssemblerSrv<T>::scansCallback, this, _1) );
++    tf_filter_->registerCallback( boost::bind(&BaseAssemblerSrv<T>::scansCallback, this, boost::placeholders::_1) );
+   }
+ }
+ 
+diff --git a/src/merge_clouds.cpp b/src/merge_clouds.cpp
+index bb84278..7ff89fb 100644
+--- a/src/merge_clouds.cpp
++++ b/src/merge_clouds.cpp
+@@ -46,9 +46,9 @@ potentially from different sensors
+ #include <tf/message_filter.h>
+ #include <tf/transform_listener.h>
+ 
++#include <boost/bind/bind.hpp>
+ #include <boost/thread/mutex.hpp>
+ #include <boost/shared_ptr.hpp>
+-#include <boost/bind.hpp>
+ 
+ #include <message_filters/subscriber.h>
+ 
+@@ -74,7 +74,7 @@ public:
+ 
+     if (max_freq_ > 0.0)
+     {
+-      timer_ = nh_.createTimer(ros::Duration(1.0/max_freq_), boost::bind(&MergeClouds::onTimer, this, _1));
++      timer_ = nh_.createTimer(ros::Duration(1.0/max_freq_), boost::bind(&MergeClouds::onTimer, this, boost::placeholders::_1));
+       haveTimer_ = true;
+     }
+     else
+@@ -83,8 +83,8 @@ public:
+     tf_filter1_.reset(new tf::MessageFilter<sensor_msgs::PointCloud>(sub1_, tf_, output_frame_, 1));
+     tf_filter2_.reset(new tf::MessageFilter<sensor_msgs::PointCloud>(sub2_, tf_, output_frame_, 1));
+ 
+-    tf_filter1_->registerCallback(boost::bind(&MergeClouds::receiveCloud1, this, _1));
+-    tf_filter2_->registerCallback(boost::bind(&MergeClouds::receiveCloud2, this, _1));
++    tf_filter1_->registerCallback(boost::bind(&MergeClouds::receiveCloud1, this, boost::placeholders::_1));
++    tf_filter2_->registerCallback(boost::bind(&MergeClouds::receiveCloud2, this, boost::placeholders::_1));
+   }
+ 
+   ~MergeClouds(void)
