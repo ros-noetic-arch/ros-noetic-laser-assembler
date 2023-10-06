@@ -6,7 +6,7 @@ url='https://wiki.ros.org/laser_assembler'
 pkgname='ros-noetic-laser-assembler'
 pkgver='1.7.8'
 arch=('i686' 'x86_64' 'aarch64' 'armv7h' 'armv6h')
-pkgrel=1
+pkgrel=2
 license=('BSD')
 
 ros_makedepends=(
@@ -44,8 +44,22 @@ depends=(
 )
 
 _dir="laser_assembler-${pkgver}"
-source=("${pkgname}-${pkgver}.tar.gz"::"https://github.com/ros-perception/laser_assembler/archive/${pkgver}.tar.gz")
-sha256sums=('cf2e8649f6df73d63c5ff0a65dea8cf21ce3f644ce47c7955a165a94d3a1ded9')
+source=(
+	"${pkgname}-${pkgver}.tar.gz"::"https://github.com/ros-perception/laser_assembler/archive/${pkgver}.tar.gz"
+	"boost.patch"
+	"eigen.patch"
+)
+sha256sums=(
+	'cf2e8649f6df73d63c5ff0a65dea8cf21ce3f644ce47c7955a165a94d3a1ded9'
+	'3cdf96b01b27bd14dae358ea7ba868491986b56d36180c3d620be84f11f3f253'
+	'b51138972193521e649643d2d6728f1edcfacab257f0bd88ef72e032e5dc692c'
+)
+
+prepare() {
+	cd "${srcdir}/${_dir}"
+	patch -p1 -i "${srcdir}/boost.patch"
+	patch -p1 -i "${srcdir}/eigen.patch"
+}
 
 build() {
 	# Use ROS environment variables.
